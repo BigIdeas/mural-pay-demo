@@ -2,6 +2,8 @@
 
 A merchant checkout application that accepts USDC payments on Polygon and automatically converts them to Colombian Pesos (COP) for bank withdrawal using Mural Pay.
 
+**Live Demo**: [https://mural-pay-demo.netlify.app](https://mural-pay-demo.netlify.app)
+
 ## Features
 
 - **Product Catalog**: Browse Colombian products with USDC prices
@@ -105,17 +107,29 @@ This allows automatic matching when the exact amount is received.
 2. **Split Payments**: Partial payments won't be detected
 3. **Duplicate Amounts**: Race condition if two orders have same amount within milliseconds
 4. **Amount Expiry**: Unique amounts expire after 1 hour in Redis
+5. **COP Payout Setup**: The Mural staging API does not expose the bank list endpoint required to create Colombian payout methods programmatically. A counterparty was created successfully, but the payout method requires manual setup through Mural support or the dashboard. The auto-payout code is implemented and ready once `MURAL_PAYOUT_METHOD_ID` is configured.
 
 ## Webhook Setup
 
 Register your webhook URL with Mural:
 
+```bash
+curl -X POST https://api-staging.muralpay.com/api/webhooks \
+  -H "Authorization: Bearer $MURAL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-domain.com/api/webhooks/mural",
+    "categories": ["MURAL_ACCOUNT_BALANCE_ACTIVITY", "PAYOUT_REQUEST"]
+  }'
 ```
-POST https://api.muralpay.com/api/webhooks
-{
-  "url": "https://your-domain.com/api/webhooks/mural",
-  "events": ["account_credited", "deposit.completed"]
-}
+
+Then enable the webhook:
+
+```bash
+curl -X PATCH https://api-staging.muralpay.com/api/webhooks/{webhookId} \
+  -H "Authorization: Bearer $MURAL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "ENABLED"}'
 ```
 
 ## Colombian Bank Payout Setup
@@ -125,7 +139,7 @@ To enable auto-payout, create a counterparty and payout method:
 ### 1. Create Counterparty
 
 ```bash
-curl -X POST https://api.muralpay.com/api/counterparties \
+curl -X POST https://api-staging.muralpay.com/api/counterparties \
   -H "Authorization: Bearer $MURAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -136,17 +150,19 @@ curl -X POST https://api.muralpay.com/api/counterparties \
 
 ### 2. Add Payout Method (Colombian Bank)
 
+> **Note**: This step requires a `bankId` from the bank list API, which is not exposed in the staging environment. Contact Mural support or use the dashboard to complete this setup.
+
 ```bash
-curl -X POST https://api.muralpay.com/api/counterparties/{id}/payout-methods \
+curl -X POST https://api-staging.muralpay.com/api/counterparties/{id}/payout-methods \
   -H "Authorization: Bearer $MURAL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "type": "bank_transfer",
     "currency": "COP",
+    "bankId": "xxx",
     "bankDetails": {
-      "bankName": "Bancolombia",
       "accountNumber": "123456789",
-      "accountType": "savings",
+      "accountType": "SAVINGS",
       "documentType": "CC",
       "documentNumber": "1234567890"
     }
@@ -190,10 +206,24 @@ Build settings:
 5. Verify payment detection (webhook or poll)
 6. Check payout status in merchant dashboard
 
-### Simulate Webhook
+### Simulate Webhook (Local)
 
 ```bash
 curl -X POST http://localhost:3000/api/webhooks/mural \
+  -H "Content-Type: application/json" \
+  -d '{
+    "eventType": "account_credited",
+    "payload": {
+      "amount": "25.001234",
+      "tokenSymbol": "USDC"
+    }
+  }'
+```
+
+### Simulate Webhook (Production)
+
+```bash
+curl -X POST https://mural-pay-demo.netlify.app/api/webhooks/mural \
   -H "Content-Type: application/json" \
   -d '{
     "eventType": "account_credited",
@@ -208,6 +238,8 @@ curl -X POST http://localhost:3000/api/webhooks/mural \
 
 ```bash
 curl http://localhost:3000/api/poll
+# or
+curl -X POST https://mural-pay-demo.netlify.app/api/poll
 ```
 
 ## Project Structure
