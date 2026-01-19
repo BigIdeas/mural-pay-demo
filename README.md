@@ -123,13 +123,22 @@ curl -X POST https://api-staging.muralpay.com/api/webhooks \
   }'
 ```
 
-Then enable the webhook:
+Then enable the webhook (note: use `/status` endpoint with `ACTIVE`):
 
 ```bash
-curl -X PATCH https://api-staging.muralpay.com/api/webhooks/{webhookId} \
+curl -X PATCH https://api-staging.muralpay.com/api/webhooks/{webhookId}/status \
   -H "Authorization: Bearer $MURAL_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"status": "ENABLED"}'
+  -d '{"status": "ACTIVE"}'
+```
+
+Test with a sample event:
+
+```bash
+curl -X POST https://api-staging.muralpay.com/api/webhooks/{webhookId}/send \
+  -H "Authorization: Bearer $MURAL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"event": {"type": "categoryTest", "category": "MURAL_ACCOUNT_BALANCE_ACTIVITY"}}'
 ```
 
 ## Colombian Bank Payout Setup
