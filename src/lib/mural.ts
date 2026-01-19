@@ -51,18 +51,18 @@ export async function getAccountBalance(accountId: string): Promise<MuralAccount
 }
 
 // Transaction History (for payment detection via polling)
-// Endpoint: GET /accounts/{accountId}/transactions
+// Endpoint: POST /transactions/search/account/{accountId}
 export async function getAccountTransactions(
   accountId: string,
-  params?: { status?: string; limit?: number }
+  params?: { limit?: number }
 ): Promise<{ results: MuralTransaction[] }> {
   const searchParams = new URLSearchParams();
-  if (params?.status) searchParams.append('status', params.status);
   if (params?.limit) searchParams.append('limit', params.limit.toString());
 
   const query = searchParams.toString();
   return muralFetch<{ results: MuralTransaction[] }>(
-    `/accounts/${accountId}/transactions${query ? `?${query}` : ''}`
+    `/transactions/search/account/${accountId}${query ? `?${query}` : ''}`,
+    { method: 'POST' }
   );
 }
 

@@ -22,13 +22,18 @@ export async function POST() {
 
     // Fetch recent transactions from the account
     const { results: transactions } = await getAccountTransactions(accountId, { limit: 50 });
-    const deposits = transactions.filter(tx => tx.type === 'deposit' || tx.type === 'credit');
+    // Filter for deposits only (transactionDetails.type === 'deposit')
+    const deposits = transactions.filter(tx => tx.transactionDetails?.type === 'deposit');
 
     let matched = 0;
     for (const order of pendingOrders) {
-      const match = deposits.find(d => Math.abs(parseFloat(d.amount) - order.uniqueAmount) < 0.000001);
+      // Amount is at tx.amount.tokenAmount
+      const match = deposits.find(d => {
+        const txAmount = d.amount.tokenAmount;
+        return Math.abs(txAmount - order.uniqueAmount) < 0.000001;
+      });
       if (match) {
-        await processPayment(order.id, match.transactionHash);
+        await processPayment(order.id, match.hash);
         matched++;
       }
     }

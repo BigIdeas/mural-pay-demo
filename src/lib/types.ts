@@ -36,13 +36,18 @@ export interface MuralAccount {
 
 export interface MuralTransaction {
   id: string;
-  status: string;
-  type: string;
-  amount: string;
-  tokenSymbol: string;
-  createdAt: string;
-  updatedAt: string;
-  transactionHash?: string;
+  hash: string;
+  transactionExecutionDate: string;
+  blockchain: string;
+  amount: {
+    tokenAmount: number;
+    tokenSymbol: string;
+  };
+  accountId: string;
+  transactionDetails?: {
+    type: 'deposit' | 'payout' | 'external_payout' | 'refund';
+    details?: unknown;
+  };
 }
 
 export interface MuralPayout {
