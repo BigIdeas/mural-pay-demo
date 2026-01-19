@@ -117,10 +117,13 @@ curl -X POST https://mural-pay-demo.netlify.app/api/webhooks/mural \
 
 ### Real Payment Test
 
-To test with actual USDC movement:
+To test with actual USDC on the blockchain:
 1. Create an order and note the unique amount
-2. In Mural dashboard: Move money → Pay → send exact amount to the deposit address
-3. Mural's webhook will fire automatically and update the order
+2. Get testnet USDC from [Circle Faucet](https://faucet.circle.com/) into an external wallet (e.g., MetaMask)
+3. Send exact USDC amount FROM external wallet TO the deposit address (`0xd4e3bc48E59b3Cad1A038a4014A1299bD8D038DA`)
+4. Mural detects incoming funds → fires `account_credited` webhook → order marked paid
+
+> **Note**: Mural's "Move money → Pay" sends funds OUT of your account. The webhook fires on incoming funds, so you need an external wallet to send TO your deposit address.
 
 ### Merchant Dashboard
 
