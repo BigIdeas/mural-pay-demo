@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -56,7 +55,6 @@ export default function MerchantDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(false);
-  const router = useRouter();
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -91,7 +89,7 @@ export default function MerchantDashboard() {
 
   const handleLogout = async () => {
     await fetch('/api/auth', { method: 'DELETE' });
-    router.push('/merchant/login');
+    window.location.href = '/merchant/login';
   };
 
   useEffect(() => {
