@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" fill="#E8E8E8"/>
+  <rect x="35" y="20" width="30" height="65" rx="3" fill="#FFFFFF" stroke="#333" stroke-width="2"/>
+  <rect x="40" y="10" width="20" height="15" rx="2" fill="#333"/>
+  <rect x="42" y="5" width="16" height="8" rx="2" fill="#8B0000"/>
+  <rect x="38" y="35" width="24" height="30" rx="1" fill="#FDE68A"/>
+  <text x="50" y="52" font-size="6" fill="#333" text-anchor="middle" font-weight="bold">GUARO</text>
+  <circle cx="50" cy="42" r="4" fill="#FFD700" stroke="#333" stroke-width="0.5"/>
+</svg>
